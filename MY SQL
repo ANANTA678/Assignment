@@ -1,0 +1,81 @@
+-- ####### Assignment ########
+select * from transactions;
+
+/* A)    ### Monthly transactions ####
+Need how much amount we have processed each month commutative and every month.
+*/ -- select count(*),sum(transaction_amount) from transactions where month(transaction_timestamp)=1 and numpoints(transaction_timestamp,"23") group by transaction_timestamp ;
+ALTER TABLE transactions ADD COLUMN new_transaction_timestamp DATETIME;
+
+UPDATE transactions SET new_transaction_timestamp = STR_TO_DATE(transaction_timestamp, '%m/%d/%y %H:%i');
+
+SELECT 
+    YEAR(new_transaction_timestamp) AS transaction_year,
+    MONTH(new_transaction_timestamp) AS transaction_month,
+    SUM(transaction_amount) AS total_amount
+FROM 
+    transactions
+GROUP BY 
+    transaction_year, transaction_month
+ORDER BY 
+     transaction_month;
+     
+ /* B)  ### Most Popular Products/Services ###
+Design a SQL query to identify the top 5 most popular products or services based on transaction counts.    
+*/      -- select distinct count(*),transaction_type,merchant_type from transactions group by transaction_type,merchant_type;
+
+SELECT 
+    merchant_name,
+    COUNT(*) AS transaction_count
+FROM 
+    transactions
+GROUP BY 
+    merchant_name
+ORDER BY 
+    transaction_count DESC
+LIMIT 5;
+
+
+/* c)  ### Daily Revenue Trend ###
+Formulate a SQL query to visualize the daily revenue trend over time.
+*/
+SELECT 
+    DATE_FORMAT(STR_TO_DATE(transaction_timestamp, '%m/%d/%y %H:%i'), '%Y-%m-%d') AS transaction_date,
+    SUM(transaction_amount) AS daily_revenue
+FROM 
+    transactions
+GROUP BY 
+    transaction_date
+ORDER BY 
+    transaction_date;
+
+
+/* D)      ### Average Transaction Amount by Product Category ###
+
+Formulate a SQL query to find the average transaction amount for each product category.
+*/
+select 
+     merchant_type, 
+     avg(transaction_amount) as avg_transaction_amount
+from 
+     transactions
+group by
+      merchant_type;
+
+
+/* E) ### Transaction Funnel Analysis ###
+
+Create a SQL query to analyze the transaction funnel, including completed, pending, and cancelled transactions.
+*/
+select * from transactions;
+    select 
+     sum(case when transaction_status in("1829" , "1002","1006") then 1 else 0 end) as number_of_completed_transactions,
+     sum(case when transaction_status = "9102" then 1 else 0 end) as number_of_pending_transactions,
+     sum(case when transaction_status = "0" then 1 else 0 end) as number_of_cancelled_transactions
+from
+    transactions;
+
+
+/* F) ### Monthly Retention Rate ###
+
+Design a SQL query to calculate the Monthly Retention Rate, grouping users into monthly cohorts.
+*/
